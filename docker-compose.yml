@@ -1,0 +1,82 @@
+services:
+  namenode:
+    image: apache/hadoop:3.3.6
+    container_name: namenode
+    user: root
+    command: ["hdfs", "namenode"]
+    environment:
+      - NAMENODE_HOSTNAME=nodename
+      - SERVICE_ADDR=/hadoop
+    volumes:
+      - hdfs_namenode:/hadoop
+      - /tmp:/tmp
+    ports:
+      - "8020:8020"
+      - "9000:9000"
+    networks:
+      - hadoop
+
+  datanode:
+    image: apache/hadoop:3.3.6
+    container_name: datanode
+    user: root
+    command: ["hdfs", "datanode"]
+    environment:
+      - NAMENODE_HOST=namenode
+    volumes:
+      - hdfs_datanode:/hadoop
+      - /tmp:/tmp
+    depends_on:
+      - namenode
+    networks:
+      - hadoop
+
+  resourcemanager:
+    image: apache/hadoop:3.3.6
+    container_name: resourcemanager
+    user: root
+    command: ["yarn", "resourcemanager"]
+    ports:
+      - "8088:8088"
+    networks:
+      - hadoop
+
+  nodemanager:
+    image: apache/hadoop:3.3.6
+    container_name: nodemanager
+    user: root
+    command: ["yarn", "nodemanager"]
+    depends_on:
+      - namenode
+      - datanode
+      - resourcemanager
+    networks:
+      - hadoop
+
+  spark:
+    image: apache/spark:3.5.0
+    container_name: spark
+    user: root
+    command: ["sleep", "infinity"]
+    volumes:
+      - ./data:/data
+      - ./jobs:/opt/jobs
+      - /root/.m2:/root/.m2
+      - /root/.ivy2:/root/.ivy2
+    environment:
+      - HADOOP_CONF_dir=/hadoop/etc/hadoop
+    depends_on:
+      - namenode
+      - datanode
+      - resourcemanager
+      - nodemanager
+    networks:
+      - hadoop
+
+volumes:
+  hdfs_namenode:
+  hdfs_datanode:
+
+networks:
+  hadoop:
+    driver: bridge

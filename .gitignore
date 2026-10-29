@@ -1,0 +1,23 @@
+# Hadoop / Spark
+*.log
+*.out
+*.crc
+target/
+spark-*.am
+spark-*.psha
+spark-*.css
+
+# HDFS / volumes locais
+data/
+output/
+userlogs/
+run/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+__pycache__/
+
+# Docker
+docker-compose.override.yml
